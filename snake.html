@@ -1,0 +1,136 @@
+<html>
+	<head></head>
+	<body>
+	  <canvas id="canvas" width="600" height="600" style="border:1px solid #000000;"></canvas>
+    <br></br>
+    <label id="score">0</label>
+	</body>
+</html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    var canvas = $("#canvas")[0];      
+    var canvas_width = $("#canvas").width();
+    var canvas_height = $("#canvas").height();
+    var context = canvas.getContext("2d");
+    var cell_var = 10;
+    var direction = "right";
+    var snake_array = [];
+    var score = 0;
+    function init(){
+      createSnake();
+      createFood();
+      if(typeof game_loop != "undefined") clearInterval(game_loop);
+      game_loop = setInterval(paint, 100);
+    }
+    init();    
+    $(document).keydown(function(e) {
+      console.log("In keydown", e.keyCode);
+      switch(e.keyCode) {
+          case 37: // left
+          direction = "left";
+          break;
+
+          case 38: // up
+          direction = "up";
+          break;
+
+          case 39: // right
+          direction = "right";
+          break;
+
+          case 40: // down
+          direction = "down";
+          break;
+
+          default: return; // exit this handler for other keys
+      }
+      e.preventDefault(); // prevent the default action (scroll / move caret)
+    });
+
+    // TODO disable keys when snake out of board
+
+    function paint(){
+      context.fillStyle = "white";
+      context.fillRect(0, 0, canvas_width, canvas_height);
+      context.strokeStyle = "black";
+      context.strokeRect(0, 0, canvas_width, canvas_height);
+      var assigning_x = snake_array[0].x;
+      var assigning_y = snake_array[0].y;
+      if(direction == "right"){
+        assigning_x++;
+      }else if(direction == "left"){
+        assigning_x--;
+      }else if(direction == "down"){
+        assigning_y++;
+      }else if(direction == "up"){
+        assigning_y--;
+      }
+      if(assigning_x == canvas_height){
+        assigning_x = 0;
+      }
+      if(assigning_y == canvas_width){
+        assigning_y = 0;
+      }
+
+      if(food.x == snake_array[0].x && food.y == snake_array[0].y) {
+        // append element to array        
+        snake_array.push(food);
+        setScore();
+        createFood();
+      }
+
+      var tail = snake_array.pop();
+      tail.x = assigning_x;
+      tail.y = assigning_y;
+      snake_array.unshift(tail);
+      for(i=0;i<snake_array.length;i++){
+        paintCell(snake_array[i].x, snake_array[i].y);
+      }
+      paintCell(food.x, food.y);
+    }
+
+    function setScore(){
+      score++;
+      $('#score').text(score);
+    }
+
+    function createSnake(){
+      var length = 5;
+      for(var i=length-1;i>=0;i--){        
+        snake_array.push({ x:i, y:0});
+      }
+    }
+
+    function createFood(){
+      var food_x = Math.floor((Math.random() * (canvas_width/cell_var - 1)) + 0);
+      var food_y = Math.floor((Math.random() * (canvas_height/cell_var - 1)) + 0);
+      console.log("createFood x", food_x);
+      console.log("createFood y", food_y);
+      food = {x:food_x, y:food_y};
+    }
+
+    function paintCell(x, y){
+      // console.log("snake_array[0].x, snake_array[0].x);
+      // if(snake_array[0].x < 0 || snake_array[0].x > 60){
+      //   console.log("Out of board");
+      // }
+      // if(snake_array[0].y < 0 || snake_array[0].y > 60){
+      //   console.log("Out of board y");
+      // }      
+      if(snake_array[0].y == 60 && direction == "down"){
+        snake_array[0].y = 0;
+      }else if(snake_array[0].y == 0 && direction == "up"){
+        snake_array[0].y = 60;
+      }else if(snake_array[0].x == 0 && direction == "left"){
+        snake_array[0].x = 60;
+      }else if(snake_array[0].x == 60 && direction == "right"){
+        snake_array[0].x = 0;
+      }
+      context.fillStyle = "black";
+      context.fillRect(x*cell_var, y*cell_var, cell_var, cell_var);
+      context.strokeStyle = "white";
+      context.strokeRect(x*cell_var, y*cell_var, cell_var, cell_var);
+    }
+  });
+</script>
